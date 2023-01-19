@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import re
 from typing import Sequence
 
 BLACKLIST = [
@@ -20,15 +21,20 @@ BLACKLIST = [
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument('filenames', nargs='*', help='Filenames to check')
+    parser.add_argument('--ignore', type=str, help='Regular expression to ignore')
     args = parser.parse_args(argv)
 
-    private_key_files = []
+    private_key_files = set()
+
+    ignore_re = re.compile(args.ignore) if args.ignore else None
 
     for filename in args.filenames:
+        if ignore_re and ignore_re.search(filename):
+            continue
         with open(filename, 'rb') as f:
             content = f.read()
             if any(line in content for line in BLACKLIST):
-                private_key_files.append(filename)
+                private_key_files.add(filename)
 
     if private_key_files:
         for private_key_file in private_key_files:
