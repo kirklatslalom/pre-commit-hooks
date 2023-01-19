@@ -29,15 +29,13 @@ def sort_file_contents(
     unique: bool = False,
 ) -> int:
     before = list(f)
-    lines: Iterable[bytes] = (
-        line.rstrip(b'\n\r') for line in before if line.strip()
-    )
+    lines: Iterable[bytes] = (line.rstrip(b"\n\r") for line in before if line.strip())
     if unique:
         lines = set(lines)
     after = sorted(lines, key=key)
 
-    before_string = b''.join(before)
-    after_string = b'\n'.join(after) + b'\n'
+    before_string = b"".join(before)
+    after_string = b"\n".join(after) + b"\n"
 
     if before_string == after_string:
         return PASS
@@ -50,36 +48,38 @@ def sort_file_contents(
 
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument('filenames', nargs='+', help='Files to sort')
+    parser.add_argument("filenames", nargs="+", help="Files to sort")
     parser.add_argument(
-        '--ignore-case',
-        action='store_const',
+        "--ignore-case",
+        action="store_const",
         const=bytes.lower,
         default=None,
-        help='fold lower case to upper case characters',
+        help="fold lower case to upper case characters",
     )
     parser.add_argument(
-        '--unique',
-        action='store_true',
-        help='ensure each line is unique',
+        "--unique",
+        action="store_true",
+        help="ensure each line is unique",
     )
     args = parser.parse_args(argv)
 
     retv = PASS
 
     for arg in args.filenames:
-        with open(arg, 'rb+') as file_obj:
+        with open(arg, "rb+") as file_obj:
             ret_for_file = sort_file_contents(
-                file_obj, key=args.ignore_case, unique=args.unique,
+                file_obj,
+                key=args.ignore_case,
+                unique=args.unique,
             )
 
             if ret_for_file:
-                print(f'Sorting {arg}')
+                print(f"Sorting {arg}")
 
             retv |= ret_for_file
 
     return retv
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     raise SystemExit(main())
